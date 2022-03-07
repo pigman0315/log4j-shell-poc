@@ -1,0 +1,7 @@
+cat LICENSE
+echo "$PATH"
+pwd
+uname -a
+ls /
+sleep 10
+exit
