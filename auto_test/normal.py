@@ -4,30 +4,40 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
 import os
+import random
 
 
 class Normal_Behavior():
 	def __init__(self):
-		self.driver = webdriver.Chrome("/home/vincent/Desktop/chromedriver")
+		self.driver = webdriver.Chrome(os.getcwd()+"/chromedriver")
 		self.driver.get("http:localhost:8080")
 		self.is_login = False
 
 	def run(self):
-		self.login(uname="pigman0315",pwd="04383129")
-		self.play_video(sec=2)
-		self.logout()
-		time.sleep(100)
-		#self.download_file(file_num=1)
-		#self.download_file(file_num=2)
-		#self.download_file(file_num=3)
+		for i in range(10):
+			rand = random.randint(0,5)
+			print(i,rand)
+			if(rand == 0):
+				self.login(True)
+			elif(rand == 1):
+				self.login(False)
+			elif(rand == 2):
+				self.play_video(2)
+			elif(rand == 3):
+				self.logout()
+			elif(rand == 4):
+				self.download_file(1)
+			elif(rand == 5):
+				self.download_file(2)
+			time.sleep(1)
+
 		self.driver.close()
 
 	def play_video(self,sec):
 		# redirect to videos.jsp & check login status
-		if(self.is_login == True):
-			self.driver.get("http:localhost:8080/videos.jsp")
-		else:
-			self.login(uname="pigman0315",pwd="04383129")
+		if(self.is_login == False):
+			self.login(is_success=True)
+		self.driver.get("http:localhost:8080/videos.jsp")	
 
 		# click play button in iframe
 		player = WebDriverWait(self.driver, 10).until(
@@ -38,10 +48,9 @@ class Normal_Behavior():
 
 	def download_file(self,file_num):
 		# redirect to files.jsp & check login status
-		if(self.is_login == True):
-			self.driver.get("http:localhost:8080/files.jsp")
-		else:
-			self.login(uname="pigman0315",pwd="04383129")
+		if(self.is_login == False):
+			self.login(is_success=True)
+		self.driver.get("http:localhost:8080/files.jsp")
 
 		# determine to download which file
 		if(file_num <= 3):
@@ -59,7 +68,18 @@ class Normal_Behavior():
 				else:
 					time.sleep(2)
 
-	def login(self,uname,pwd):	
+	def login(self,is_success):
+		# if login, logout first
+		if(self.is_login == True):
+			self.logout()
+
+		if(is_success == True):
+			uname = "pigman0315"
+			pwd = "04383129"
+		else:
+			uname = "anonymous"
+			pwd = "123456"
+
 		self.driver.get("http:localhost:8080/login.jsp")
 		username = WebDriverWait(self.driver, 10).until(
 			EC.presence_of_element_located((By.NAME, "username"))
@@ -74,6 +94,7 @@ class Normal_Behavior():
 		password.clear()
 		username.send_keys(uname)
 		password.send_keys(pwd)
+		time.sleep(1)
 		login_button.click()
 
 		if(uname=="pigman0315" and pwd=="04383129"):
@@ -88,7 +109,7 @@ class Normal_Behavior():
 				EC.presence_of_element_located((By.XPATH, "/html/body/form/input"))
 			)
 			logout_button.click()
-			is_login = False
+			self.is_login = False
 
 		else:
 			self.driver.get("http:localhost:8080/login.jsp")
